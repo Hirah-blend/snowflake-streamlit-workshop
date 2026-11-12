@@ -1,4 +1,3 @@
-
 import streamlit as st
 import requests
 
@@ -73,7 +72,11 @@ if ingredients_list:
                 f"{fruit_chosen} Nutrition Information"
             )
 
-            st.json(smoothiefroot_response.json())
+            # Show nutrition info as a table (instead of st.json)
+            sf_df = st.dataframe(
+                data=smoothiefroot_response.json(),
+                use_container_width=True
+            )
 
         except requests.exceptions.RequestException:
             st.warning(
