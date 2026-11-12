@@ -35,7 +35,21 @@ if ingredients_list:
     ingredients_string = ""
 
     for fruit_chosen in ingredients_list:
+
         ingredients_string += fruit_chosen + " "
+
+        # Fetch nutrition information for each selected fruit
+        smoothiefroot_response = requests.get(
+            f"https://my.smoothiefroot.com/api/fruit/{fruit_chosen.lower()}",
+            timeout=15
+        )
+
+        smoothiefroot_response.raise_for_status()
+
+        sf_df = st.dataframe(
+            data=smoothiefroot_response.json(),
+            use_container_width=True
+        )
 
     submit_button = st.button("Submit Order")
 
@@ -54,24 +68,3 @@ if ingredients_list:
             f"Your Smoothie is ordered, {name_on_order}!",
             icon="✅"
         )
-
-
-# New section: Display SmoothieFroot nutrition information
-
-st.header("SmoothieFroot Nutrition Information")
-
-try:
-    smoothiefroot_response = requests.get(
-        "https://my.smoothiefroot.com/api/fruit/watermelon",
-        timeout=15
-    )
-
-    smoothiefroot_response.raise_for_status()
-
-    st.dataframe(
-        data=smoothiefroot_response.json(),
-        use_container_width=True
-    )
-
-except requests.RequestException as e:
-    st.error(f"Unable to fetch fruit information: {e}")
