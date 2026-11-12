@@ -87,25 +87,38 @@ if ingredients_list:
     # Submit order
     submit_button = st.button("Submit Order")
 
+    # if submit_button:
+
+    #     if not name_on_order.strip():
+    #         st.error("Please enter a name for your smoothie.")
+
+    #     else:
+    #         # Insert order into Snowflake
+    #         session.sql(
+    #             """
+    #             INSERT INTO smoothies.public.orders
+    #             (ingredients, name_on_order)
+    #             VALUES (?, ?)
+    #             """,
+    #             params=[
+    #                 ingredients_string.strip(),
+    #                 name_on_order.strip()
+    #             ]
+    #         ).collect()
+
+    #         st.success(
+    #             f"Your Smoothie is ordered, {name_on_order}!",
+    #             icon="✅"
+    #         )
+
+
     if submit_button:
 
         if not name_on_order.strip():
             st.error("Please enter a name for your smoothie.")
-
+    
         else:
-            # Insert order into Snowflake
-            session.sql(
-                """
-                INSERT INTO smoothies.public.orders
-                (ingredients, name_on_order)
-                VALUES (?, ?)
-                """,
-                params=[
-                    ingredients_string.strip(),
-                    name_on_order.strip()
-                ]
-            ).collect()
-
+            # Temporarily disable database insert
             st.success(
                 f"Your Smoothie is ordered, {name_on_order}!",
                 icon="✅"
