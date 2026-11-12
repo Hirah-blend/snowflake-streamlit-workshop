@@ -1,4 +1,6 @@
+
 import streamlit as st
+import requests
 
 from snowflake.snowpark.functions import col
 
@@ -12,6 +14,7 @@ Choose the fruits you want in your custom Smoothie!
 name_on_order = st.text_input("Name on Smoothie:")
 
 st.write("The name on your Smoothie will be:", name_on_order)
+
 cnx = st.connection("snowflake")
 
 session = cnx.session()
@@ -51,3 +54,24 @@ if ingredients_list:
             f"Your Smoothie is ordered, {name_on_order}!",
             icon="✅"
         )
+
+
+# New section: Display SmoothieFroot nutrition information
+
+st.header("SmoothieFroot Nutrition Information")
+
+try:
+    smoothiefroot_response = requests.get(
+        "https://my.smoothiefroot.com/api/fruit/watermelon",
+        timeout=15
+    )
+
+    smoothiefroot_response.raise_for_status()
+
+    st.dataframe(
+        data=smoothiefroot_response.json(),
+        use_container_width=True
+    )
+
+except requests.RequestException as e:
+    st.error(f"Unable to fetch fruit information: {e}")
