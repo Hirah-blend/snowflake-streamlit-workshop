@@ -20,7 +20,7 @@ st.write("The name on your Smoothie will be:", name_on_order)
 cnx = st.connection("snowflake")
 session = cnx.session()
 
-# Retrieve fruit names and their API search terms
+# Retrieve fruit names and API search terms
 my_dataframe = (
     session.table("smoothies.public.fruit_options")
     .select(
@@ -33,7 +33,7 @@ my_dataframe = (
 fruit_options = {
     row["FRUIT_NAME"]: row["SEARCH_ON"]
     for row in my_dataframe.collect()
-    if row["SEARCH_ON"]
+    if row["SEARCH_ON"] is not None
 }
 
 # Fruit selection
@@ -49,13 +49,19 @@ if ingredients_list:
 
     for fruit_chosen in ingredients_list:
 
-        # Keep customer-facing fruit name for the order
+        # Keep original fruit name for the order
         ingredients_string += fruit_chosen + " "
 
-        # Use SEARCH_ON value for API lookup
+        # Get API search value from SEARCH_ON column
         search_term = fruit_options[fruit_chosen]
 
+        # Display search value
+        st.write(
+            f"The search value for {fruit_chosen} is {search_term}."
+        )
+
         try:
+            # Fetch nutrition information
             smoothiefroot_response = requests.get(
                 f"https://my.smoothiefroot.com/api/fruit/{search_term.lower()}",
                 timeout=15
@@ -63,14 +69,16 @@ if ingredients_list:
 
             smoothiefroot_response.raise_for_status()
 
-            st.subheader(f"Nutrition information: {fruit_chosen}")
+            st.subheader(
+                f"{fruit_chosen} Nutrition Information"
+            )
 
             st.json(smoothiefroot_response.json())
 
-        except requests.exceptions.RequestException as e:
+        except requests.exceptions.RequestException:
             st.warning(
                 f"Nutrition information for {fruit_chosen} "
-                f"could not be retrieved."
+                "could not be retrieved."
             )
 
     # Submit order
@@ -82,7 +90,7 @@ if ingredients_list:
             st.error("Please enter a name for your smoothie.")
 
         else:
-            # Safely insert order using parameter binding
+            # Insert order into Snowflake
             session.sql(
                 """
                 INSERT INTO smoothies.public.orders
@@ -99,4 +107,3 @@ if ingredients_list:
                 f"Your Smoothie is ordered, {name_on_order}!",
                 icon="✅"
             )
-
