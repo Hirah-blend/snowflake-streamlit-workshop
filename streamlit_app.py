@@ -46,7 +46,10 @@ ingredients_list = st.multiselect(
 if ingredients_list:
 
     # Build ingredient string in the selected order
-    ingredients_string = " ".join(ingredients_list)
+    ingredients_string = ""
+
+    for fruit_chosen in ingredients_list:
+        ingredients_string += fruit_chosen + " "
 
     st.write("Selected ingredients:", ingredients_string)
 
@@ -110,3 +113,4 @@ if ingredients_list:
                 f"Your Smoothie is ordered, {name_on_order}!",
                 icon="✅"
             )
+
