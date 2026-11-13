@@ -45,22 +45,23 @@ ingredients_list = st.multiselect(
 
 if ingredients_list:
 
-    # Build ingredient string in the selected order
-    ingredients_string = " ".join(ingredients_list)
+    ingredients_string = ""
 
-    st.write("Selected ingredients:", ingredients_string)
-
-    # Fetch nutrition information for each selected fruit
     for fruit_chosen in ingredients_list:
 
-        # Get API search value from SEARCH_ON
+        # Keep original fruit name for the order
+        ingredients_string += fruit_chosen + " "
+
+        # Get API search value from SEARCH_ON column
         search_term = fruit_options[fruit_chosen]
 
+        # Display search value
         st.write(
             f"The search value for {fruit_chosen} is {search_term}."
         )
 
         try:
+            # Fetch nutrition information
             smoothiefroot_response = requests.get(
                 f"https://my.smoothiefroot.com/api/fruit/{search_term.lower()}",
                 timeout=15
@@ -72,7 +73,8 @@ if ingredients_list:
                 f"{fruit_chosen} Nutrition Information"
             )
 
-            st.dataframe(
+            # Show nutrition info as a table (instead of st.json)
+            sf_df = st.dataframe(
                 data=smoothiefroot_response.json(),
                 use_container_width=True
             )
@@ -92,7 +94,6 @@ if ingredients_list:
             st.error("Please enter a name for your smoothie.")
 
         else:
-
             # Insert order into Snowflake
             session.sql(
                 """
@@ -101,7 +102,7 @@ if ingredients_list:
                 VALUES (?, ?)
                 """,
                 params=[
-                    ingredients_string,
+                    ingredients_string.strip(),
                     name_on_order.strip()
                 ]
             ).collect()
@@ -110,3 +111,16 @@ if ingredients_list:
                 f"Your Smoothie is ordered, {name_on_order}!",
                 icon="✅"
             )
+
+
+    # if submit_button:
+
+    #     if not name_on_order.strip():
+    #         st.error("Please enter a name for your smoothie.")
+    
+    #     else:
+    #         # Temporarily disable database insert
+    #         st.success(
+    #             f"Your Smoothie is ordered, {name_on_order}!",
+    #             icon="✅"
+    #         )
